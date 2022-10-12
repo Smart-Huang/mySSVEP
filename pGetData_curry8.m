@@ -5,9 +5,9 @@ if (get(con, 'BytesAvailable')==dataBuffer)
     dataOri = uint8(dataOri);
     temp1=typecast(dataOri, 'single');
     temp1(1:5,:)=[];
-    %     temp2 = reshape(temp1,chanNum+1,0.2*sampleRate);
-    %     data1 = temp2';
-    data1 = reshape(temp1, 0.2*sampleRate, chanNum+1);
+    temp2 = reshape(temp1,chanNum+1,0.2*sampleRate);
+    data1 = temp2';
+    % data1 = reshape(temp1, 0.2*sampleRate, chanNum+1);
     data=double(data1);
 else
     data=[];
