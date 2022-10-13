@@ -2,6 +2,8 @@ function result = onlineAnalysis(rawdata,stimTime,chanum,freq)
 %
 % -------------------------------------------------------------------------
 % 参数
+global sampleRate;
+
 condition = length(freq);
 lDelay = 0.14;
 % N1 = 1000*(stimTime + lDelay);
@@ -12,11 +14,11 @@ for chan = 1:chanum
    % indexsMin = find(Diffmark~=0);
    % iMin = max(indexsMin);
    % downsdata = downsample(rawdata(round(iMin+1):round(iMin+N1),chan),4);
-   downsdata = downsample(rawdata(1:8000,chan),4);
-   bpdata(:,chan) = bp40(downsdata,250);
+   downsdata = downsample(rawdata(:,chan),4);
+   bpdata(:,chan) = bp40(downsdata,sampleRate/4);
 end
 % -------------------------------------------------------------------------
-rfs = 250;%降采样后的采样率
+rfs = sampleRate/4;%降采样后的采样率
 latencyDelay = lDelay*rfs;%延时采样点数
 N = round(stimTime*rfs);
 n = [1:N]/rfs;
