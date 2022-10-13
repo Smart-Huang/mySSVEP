@@ -1,64 +1,67 @@
-% æ¸…ç©ºå±å¹•
+% Çå¿ÕÆÁÄ»
 clear;
 clc;
 sca;
 
-% ç¬”è®°æœ¬éœ€è¦è·³è¿‡æ£€æµ‹ï¼Œå°å¼æœºä¸éœ€è¦
+% ±Ê¼Ç±¾ĞèÒªÌø¹ı¼ì²â£¬Ì¨Ê½»ú²»ĞèÒª
 Screen('Preference', 'SkipSyncTests', 1);
 
-% æ£€æµ‹å±å¹•çš„åˆ·æ–°é¢‘ç‡æ˜¯å¦ä¸º60Hz
+% ¼ì²âÆÁÄ»µÄË¢ĞÂÆµÂÊÊÇ·ñÎª60Hz
 screenFreq = 60;
-if Screen('FrameRate',1)~=screenFreq
-    disp(['å±å¹•åˆ·æ–°é¢‘ç‡ä¸æ˜¯', num2str(screenFreq), 'Hz']);
+if Screen('FrameRate',0)~=screenFreq
+    disp(['ÆÁÄ»Ë¢ĞÂÆµÂÊ²»ÊÇ', num2str(screenFreq), 'Hz']);
     return;
 end
 frame_rate = screenFreq;
 
 %%
-% åŸºæœ¬å‚æ•°
-channelNum = 7; %é€šé“æ•°é‡ï¼ˆä¸åŒ…å«äº‹ä»¶é€šé“MGFPï¼‰ï¼Œc3,c4,p3,p4,o1,o2,cz
-freq = [7.5, 6.0]; % ç®­å¤´çš„é—ªçƒé¢‘ç‡ï¼Œå·¦ç®­å¤´7.5Hzï¼Œå³ç®­å¤´6Hz
-blankTime = 2; % ç©ºå±çš„æŒç»­æ—¶é—´
-crossTime = 2; % åå­—æŒç»­æ—¶é—´
-arrowTime = 6; % ç®­å¤´æŒç»­æ—¶é—´
-trialNum = 10; % å®éªŒæ¬¡æ•°
+% »ù±¾²ÎÊı
+channelNum = 7; %Í¨µÀÊıÁ¿£¨²»°üº¬ÊÂ¼şÍ¨µÀMGFP£©£¬c3,c4,p3,p4,o1,o2,cz
+freq = [7.5, 6.0]; % ¼ıÍ·µÄÉÁË¸ÆµÂÊ£¬×ó¼ıÍ·7.5Hz£¬ÓÒ¼ıÍ·6Hz
+blankTime = 2; % ¿ÕÆÁµÄ³ÖĞøÊ±¼ä
+crossTime = 0.4; % Ê®×Ö³ÖĞøÊ±¼ä
+arrowTime = 2; % ¼ıÍ·³ÖĞøÊ±¼ä
+trialNum = 10; % ÊµÑé´ÎÊı
 
 %--------------------------------------------------------------------------
-% å®æ—¶æ•°æ®ä¼ è¾“ç›¸å…³çš„å‚æ•°
+% ÊµÊ±Êı¾İ´«ÊäÏà¹ØµÄ²ÎÊı
 % params.channelNum = channelNum;
-params.sampleRate = 1000;
+
+global sampleRate;
+sampleRate = 1024;
 params.dataLength = crossTime + arrowTime;
-params.ipAddress = '10.20.8.184';
+params.ipAddress = '192.168.163.213';
 params.serverPort = 4455;
 
-buffSize = round(params.dataLength * params.sampleRate);
+buffSize = round(params.dataLength * sampleRate);
 circBuff = zeros(buffSize, channelNum + 1);
-% éœ€è¦æ³¨é‡Š,20æ˜¯æ•°æ®å¤´ï¼Œ200æ˜¯é‡‡é›†æ—¶é—´200msï¼Œ4æ˜¯4ä¸ªå­—èŠ‚ï¼Œä¸€ä¸ªé€šé“æ•°æ®æ˜¯8ä½16è¿›åˆ¶æ•°è¡¨ç¤º
-dataBuffer = ((channelNum+1)*4*(200*params.sampleRate/1000)+20);
+% ĞèÒª×¢ÊÍ,20ÊÇÊı¾İÍ·£¬200ÊÇ²É¼¯Ê±¼ä200ms£¬4ÊÇ4¸ö×Ö½Ú£¬Ò»¸öÍ¨µÀÊı¾İÊÇ8Î»16½øÖÆÊı±íÊ¾
+dataBuffer = ((channelNum+1)*4*(200*sampleRate/1000)+20);
 
 %%
-% å¼€å§‹ä¼ è¾“æ•°æ®æŒ‡ä»¤
+% ¿ªÊ¼´«ÊäÊı¾İÖ¸Áî
 startheader = initHeader('CTRL',...
     controlCode('CTRL_FromClient'),...
     requestType('RequestStreamingStart'),...
     0,0,0);
 % -------------------------------------------------------------------------
-% åœæ­¢ä¼ è¾“æ•°æ®æŒ‡ä»¤
+% Í£Ö¹´«ÊäÊı¾İÖ¸Áî
 stopheader = initHeader('CTRL',...
     controlCode('CTRL_FromClient'),...
     requestType('RequestStreamingStop'),...
     0,0,0);
+
 % -------------------------------------------------------------------------
-% tcpipç«¯å£è®¾ç½®
+% tcpip¶Ë¿ÚÉèÖÃ
 con = tcpip(params.ipAddress, params.serverPort);
 set(con,'InputBufferSize',dataBuffer);
 set(con,'ByteOrder','littleEndian');
 fopen(con); 
 %%
-% PTBçš„åŸºæœ¬è®¾ç½®å’ŒåŸºæœ¬å‚æ•°
-% è·å¾—å±å¹•ç¼–å·ï¼Œè®¾ç½®é»‘ç™½å€¼
+% PTBµÄ»ù±¾ÉèÖÃºÍ»ù±¾²ÎÊı
+% »ñµÃÆÁÄ»±àºÅ£¬ÉèÖÃºÚ°×Öµ
 screens = Screen('Screens');
-screenNumber = 1;
+screenNumber = 0;
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 grey = white / 2;
@@ -71,57 +74,57 @@ try
    
     AssertOpenGL;
     
-    HideCursor;   % éšè—é¼ æ ‡
+    HideCursor;   % Òş²ØÊó±ê
     
     % Open an on screen window
     [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
     
-    % è·å¾—å±å¹•å°ºå¯¸ã€åæ ‡å’Œåˆ·æ–°ç‡ä¿¡æ¯
+    % »ñµÃÆÁÄ»³ß´ç¡¢×ø±êºÍË¢ĞÂÂÊĞÅÏ¢
     [screenXpixels, screenYpixels] = Screen('WindowSize', window);
     [xCenter, yCenter] = RectCenter(windowRect);
     ifi = Screen('GetFlipInterval', window);
-    % è®¾ç½®ç¿»è½¬é—´éš”
+    % ÉèÖÃ·­×ª¼ä¸ô
     presSecs = 2;
     waitframes = round(presSecs / ifi);
     
-    % å°†ä¼˜å…ˆçº§è®¾ç½®ä¸ºæœ€é«˜
+    % ½«ÓÅÏÈ¼¶ÉèÖÃÎª×î¸ß
     topPriorityLevel = MaxPriority(window);
     Priority(topPriorityLevel);
     
-    % è®¾ç½®å­—ä½“é¢œè‰²
+    % ÉèÖÃ×ÖÌåÑÕÉ«
     Screen('TextColor', window, white);
-    % è®¾ç½®å­—ä½“å¤§å°
+    % ÉèÖÃ×ÖÌå´óĞ¡
     Screen('TextSize', window, 64);
     
-    % æŠ—é”¯é½¿
+    % ¿¹¾â³İ
     Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
     %------------------------------------------------------------------------
-    % è®¾ç½®å›¾ç‰‡åŸºæœ¬å‚æ•°
-    % éšæœºç”ŸæˆtrialNumä¸ªç®­å¤´
+    % ÉèÖÃÍ¼Æ¬»ù±¾²ÎÊı
+    % Ëæ»úÉú³ÉtrialNum¸ö¼ıÍ·
     data = cell(1, trialNum);
     for i = 1:trialNum
         if unidrnd(2) == 1
-            data{1, i} = 'â†';
+            data{1, i} = '¡û';
         else
-            data{1, i} = 'â†’';
+            data{1, i} = '¡ú';
         end
     end
     
-    % æœ¬å®éªŒç”¨çš„ç´ ææœ‰é—ªçƒçš„çº¢è‰²çš„ç®­å¤´å’ŒæŒ‡ç¤ºç”¨çš„é»‘è‰²ç®­å¤´
-    % è½½å…¥é—ªçƒç®­å¤´çš„å›¾ç‰‡
-    rawLeftFlicker = imread('å·¦é—ªçƒ2.png');
+    % ±¾ÊµÑéÓÃµÄËØ²ÄÓĞÉÁË¸µÄºìÉ«µÄ¼ıÍ·ºÍÖ¸Ê¾ÓÃµÄºÚÉ«¼ıÍ·
+    % ÔØÈëÉÁË¸¼ıÍ·µÄÍ¼Æ¬
+    rawLeftFlicker = imread('×óÉÁË¸2.png');
     % leftFlicker = Screen('MakeTexture', window, rawLeftFlicker);
-    % å°†å·¦ç®­å¤´çš„å›¾åƒç¿»è½¬180Â°å°±æ˜¯å³ç®­å¤´
-    % rightArrow = Screen('MakeTexture', window, imread('å³ç®­å¤´.png'));
-    rawCross = imread('åå­—_é»‘.png');
+    % ½«×ó¼ıÍ·µÄÍ¼Ïñ·­×ª180¡ã¾ÍÊÇÓÒ¼ıÍ·
+    % rightArrow = Screen('MakeTexture', window, imread('ÓÒ¼ıÍ·.png'));
+    rawCross = imread('Ê®×Ö_ºÚ.png');
     
-    % å›¾ç‰‡çš„å¤§å°
+    % Í¼Æ¬µÄ´óĞ¡
     widthLeftFlicker = size(rawLeftFlicker, 2);
     heightLeftFlicker = size(rawLeftFlicker, 1);
     widthCross = size(rawCross, 2);
     heightCross = size(rawCross, 1);
     
-    % è®¾ç½®ç®­å¤´ä½ç½®
+    % ÉèÖÃ¼ıÍ·Î»ÖÃ
     leftFlickerLocation = [screenXpixels*0.25, yCenter-heightLeftFlicker/2,...
         screenXpixels*0.25+widthLeftFlicker, yCenter+heightLeftFlicker/2];
     rightFlickerLocation = [screenXpixels*0.75-widthLeftFlicker, yCenter-heightLeftFlicker/2,...
@@ -129,7 +132,7 @@ try
     crossLocation = [xCenter-widthCross/2, yCenter-heightCross/2,...
         xCenter+widthCross/2, yCenter+heightCross/2];
     
-    % è®¾ç½®ç®­å¤´é—ªçƒé¢‘ç‡
+    % ÉèÖÃ¼ıÍ·ÉÁË¸ÆµÂÊ
     leftFlickerFreq = 7.5;
     rightFlickerFreq = 6.0;
     
@@ -140,14 +143,14 @@ try
     
     %for frame = 1 : round(screenFreq * arrowTime)
     
-    % é¢„åˆ†é…å†…å­˜
+    % Ô¤·ÖÅäÄÚ´æ
     leftFlicker = cell(1, 60);
     temp = cell(1, 60);
     leftFlickerTexture = zeros(1, 60);
     rightFlicker = cell(1, 60);
     rightFlickerTexture = zeros(1, 60);
     
-    % è®¾ç½®æ¯ä¸€å¸§çš„äº®åº¦å€¼
+    % ÉèÖÃÃ¿Ò»Ö¡µÄÁÁ¶ÈÖµ
     for frame = 1 : 60
         leftFlicker{frame} = (1/2)*(1+sin(2*pi*leftFlickerFreq*(frame/screenFreq)))*rawLeftFlicker;
         temp{frame} = (1/2)*(1+sin(2*pi*leftFlickerFreq*(frame/screenFreq)));
@@ -160,15 +163,15 @@ try
     crossTexture = Screen('MakeTexture', window, rawCross);
 
     %%
-    % è®¾ç½®è®¡æ—¶å™¨
-    % è®¡æ—¶å™¨çš„é—´éš”ä¸º0.02s
-    % æ—¶é—´å‡½æ•°ä¸ºä»curry8ä¸­æœ€è¿‘çš„0.2sçš„æ•°æ®ï¼Œç„¶åå­˜å…¥circBuff
-    % è®¡æ—¶å™¨çš„åŠŸèƒ½å°±æ˜¯æ¯0.02så¾€
+    % ÉèÖÃ¼ÆÊ±Æ÷
+    % ¼ÆÊ±Æ÷µÄ¼ä¸ôÎª0.02s
+    % Ê±¼äº¯ÊıÎª´Ócurry8ÖĞ×î½üµÄ0.2sµÄÊı¾İ£¬È»ºó´æÈëcircBuff
+    % ¼ÆÊ±Æ÷µÄ¹¦ÄÜ¾ÍÊÇÃ¿0.02sÍù
     fixTime = timer('Period', 0.02);
     set(fixTime, 'ExecutionMode', 'FixedRate');
-    set(fixTime,'TimerFcn',['newset=pGetData_curry8(con,dataBuffer,chanum,params.sampleRate);','if ~isempty(newset)',...
-        'circBuff =[circBuff(0.2*params.sampleRate+1:end,:);newset];','end']);
-    start(fixTime); % å¯åŠ¨è®¡æ—¶å™¨
+    set(fixTime,'TimerFcn',['newset=pGetData_curry8(con,dataBuffer,chanum,sampleRate);','if ~isempty(newset)',...
+        'circBuff =[circBuff(0.2*sampleRate+1:end,:);newset];','end']);
+    start(fixTime); % Æô¶¯¼ÆÊ±Æ÷
     
     
     
@@ -176,47 +179,43 @@ try
     results = cell(1, trialNum);
     for trial = 1 : trialNum
       
-        count1 = 0;
-        
-        
-        % æ˜¾ç¤º2såå­—
+        % count1 = 0;
+        fwrite(con, startheader,'uchar');
+        % ÏÔÊ¾2sÊ®×Ö
         Screen('DrawTexture', window, crossTexture, [], crossLocation, 0);
         vbl = Screen('Flip', window);
-        WaitSecs(2);
-        
-        % æ˜¾ç¤º6sç®­å¤´
+        WaitSecs(crossTime);
+   
+        % ÏÔÊ¾6s¼ıÍ·
         for j = 1 : arrowTime
-            count1 = count1 + 1;
+            % count1 = count1 + 1;
+            
             for i = 1 : 60
                 DrawFormattedText(window, data{1, trial}, 'center', 'center', white);
                 Screen('DrawTexture', window, leftFlickerTexture(i), [], leftFlickerLocation, 0);
                 Screen('DrawTexture', window, rightFlickerTexture(i), [], rightFlickerLocation, 180);
                 vbl=Screen('Flip',window);
-            end
-            
-            if count1 == 1
-                fwrite(con, startheader, 'uchar');
-            end   
+            end      
         end
         
         fwrite(con, stopheader, 'uchar');
         
         % remove baseline
-        % median(circBuff,2)è¿”å›æ¯ä¸€è¡Œçš„ä¸­ä½æ•°
-        % repmat(A, a, b)çš„ä½œç”¨æ˜¯å°†çŸ©é˜µAçš„è¡Œå’Œåˆ—åˆ†åˆ«å¤åˆ¶aæ¬¡å’Œbæ¬¡
-        % è¿™æ®µä»£ç çš„ä½œç”¨æ˜¯å°†circBuffçš„å„ä¸ªé€šé“çš„æ•°å€¼å‡å»å„è‡ªçš„ä¸­ä½æ•°
+        % median(circBuff,2)·µ»ØÃ¿Ò»ĞĞµÄÖĞÎ»Êı
+        % repmat(A, a, b)µÄ×÷ÓÃÊÇ½«¾ØÕóAµÄĞĞºÍÁĞ·Ö±ğ¸´ÖÆa´ÎºÍb´Î
+        % Õâ¶Î´úÂëµÄ×÷ÓÃÊÇ½«circBuffµÄ¸÷¸öÍ¨µÀµÄÊıÖµ¼õÈ¥¸÷×ÔµÄÖĞÎ»Êı
         circBuff = circBuff';
         circBuff = circBuff - repmat(median(circBuff,2),1,buffSize);
         circBuff = circBuff';
         
         
-        % åœ¨çº¿åˆ†æ
+        % ÔÚÏß·ÖÎö
         resultnum = onlineAnalysis(circBuff,arrowTime,channelNum,freq);
         
         if resultnum == 1
-            results(trial) = 'â†';
+            results(trial) = '¡û';
         else
-            results(trial) = 'â†’';
+            results(trial) = '¡ú';
         end
  
     end % trial
@@ -227,19 +226,19 @@ try
     
     
     Priotity(0);
-    % å…³é—­è®¡æ—¶å™¨
+    % ¹Ø±Õ¼ÆÊ±Æ÷
     stop(fixTime);
     
  
-    % å…³é—­ä¸æœåŠ¡ç«¯è¿æ¥ï¼Œåœæ­¢æ¥æ”¶è„‘ç”µæ•°æ®
+    % ¹Ø±ÕÓë·şÎñ¶ËÁ¬½Ó£¬Í£Ö¹½ÓÊÕÄÔµçÊı¾İ
     fclose(con);
     delete(con);
 catch
     ShowCursor;
-    % å…³é—­è®¡æ—¶å™¨
+    % ¹Ø±Õ¼ÆÊ±Æ÷
     stop(fixTime);
     sca;
-    psychrethrow(psychlasterror);  %æŠ›å‡ºæœ€åä¸€æ¡é”™è¯¯
+    psychrethrow(psychlasterror);  %Å×³ö×îºóÒ»Ìõ´íÎó
 end
 
 KbStrokeWait;
