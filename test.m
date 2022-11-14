@@ -1,7 +1,20 @@
-a = cell(2, 1);
-a(1) = {'h'};
+tic
 
-b = cell(2, 1);
-b(1) = {'h'};
+frequencySet=[8:0.2:15.8];
+nConditions = length(frequencySet);
+condition = 1:nConditions;
 
-c = (a == b);
+a = ['huang' 'xiao' 'dong'];
+
+toc
+
+tic
+
+fs = 256;
+fo = 50;
+q = 35;
+bw = (fo/(fs/2))/q;
+[b,a] = iircomb(floor(fs/fo),bw,'notch'); % Note type flag 'notch'
+fvtool(b, a);
+
+toc

@@ -5,14 +5,14 @@ sca;
 global sampleRate;
 channelNum = 7;
 sampleRate = 1024;
-params.ipAddress = '192.168.97.213';
+params.ipAddress = '10.20.8.184';
 params.serverPort = 4455;
 
-circBuff = zeros(sampleRate, channelNum + 1);
+circBuff = zeros(sampleRate, channelNume + 1);
 
-dataBuffer = ( (channelNum+1) * 4 * (200*sampleRate/1000) + 20 );
+dataBuff = ( (channelNum+1) * 4 * (200*sampleRate/1000) + 20 );
 
-% �?始传输数据指�?
+% 开始传输数据指令
 startheader = initHeader('CTRL',...
     controlCode('CTRL_FromClient'),...
     requestType('RequestStreamingStart'),...
@@ -34,9 +34,9 @@ fopen(con);
 try
     fixTime = timer('Period', 0.02);
     set(fixTime, 'ExecutionMode', 'FixedRate');
-    set(fixTime,'TimerFcn',['newset=pGetData_curry8(con,dataBuffer,channelNum,sampleRate);','if ~isempty(newset)',...
+    set(fixTime,'TimerFcn',['newset=pGetData_curry8(con,dataBuffer,chanum,sampleRate);','if ~isempty(newset)',...
         'circBuff =[circBuff(0.2*sampleRate+1:end,:);newset];','end']);
-    start(fixTime); % 启动计时�?
+    start(fixTime); % 启动计时器
     
     for i = 1:10
         
@@ -58,7 +58,6 @@ catch
     fclose(con);
     delete(con);
     sca;
-   
     psychrethrow(psychlasterror);
 end
 
